@@ -5,27 +5,50 @@
 #ifndef TASK_HPP_
 #define TASK_HPP_
 
-template<typename Output_, typename ...Input_>
-class Task
+#include <tuple>
+
+template<typename>
+class Task; // undefined
+
+
+template<typename Output_, typename... Input_>
+class Task<Output_(Input_...)>
 {
 public:
     using Input = std::tuple<Input_...>;
     using Output = Output_;
 
-    Task(Output_ (*)(Input_...) function) :
+    Task() :
+        f_ptr(nullptr)
+    {
+    }
+
+    Task(Output_ (*function)(Input_...)) :
         f_ptr(function)
     {
     }
 
-    Output_ operator(Input_... args)
+    Task& operator=(Output_ (*function)(Input_...))
     {
-        return f_ptr(args...)
+        f_ptr = function;
+        return *this;
+    }
+
+    Task& operator=(Task t)
+    {
+        f_ptr = t.f_ptr;
+        return *this;
+    }
+
+    Output_ operator() (Input_... args)
+    {
+        return f_ptr(args...);
     }
 
 
 
 private:
-    Output_ (*)(Input_) f_ptr;
-}
+    Output_ (*f_ptr)(Input_...);
+};
 
 #endif
